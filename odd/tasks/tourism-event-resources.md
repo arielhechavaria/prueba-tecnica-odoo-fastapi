@@ -13,7 +13,7 @@ Branch: feat/tourism-event-resources | Delivery strategy: ask-on-risk | Test run
 ## Tasks
 - [x] T1 (S1) inline — docker compose Odoo 17 + PostgreSQL + FastAPI, healthchecks, `.env.example` — suggested model: sonnet — commit: 1ffa6bd
 - [x] T2 (S2) inline — Odoo addon `tourism_event`: event model — suggested model: opus — commit: 0c0d0fc
-- [ ] T3 (S4) inline — resource model + date-range allocations + overlap constraint — suggested model: opus — commit: pending
+- [x] T3 (S4) inline — resource model + date-range allocations + overlap constraint — suggested model: opus — commit: 611d117
 - [ ] T4 (S3) inline — state transitions that drive allocation status — suggested model: opus — commit: pending
 - [ ] T5 (S5) inline — FastAPI Odoo client + endpoints — suggested model: sonnet — commit: pending
 - [ ] T6 (S2-S5) inline — tests: RED then GREEN, overlap conflicts, invalid transitions — suggested model: sonnet — commit: pending
@@ -26,4 +26,5 @@ Branch: feat/tourism-event-resources | Delivery strategy: ask-on-risk | Test run
 - T1 done (2026-10-27): `docker compose config` OK; `up --build --wait` brought db, odoo, api to healthy; `GET :8001/health` -> `{"status":"ok"}`; Odoo `/web/login` -> 303 (no database yet, expected). Host ports 5432 and 8000 were already taken, so Postgres is not published and the API uses 8001. RED exception: infra task, no runnable test; checked structurally and at runtime. Risk: none.
 - T2 done (2026-10-27): created db `tourism` (`-i base`); RED observed (model missing, tests error); GREEN: 4 tests pass via `odoo -d tourism -i tourism_event --test-tags /tourism_event --stop-after-init`. Tightened the required-fields test to `IntegrityError` because `assertRaises(Exception)` passed vacuously in RED. State keys: `antes|durante|despues`. Risk: none.
 - Test runner (Odoo): `docker compose exec -T odoo odoo -d tourism -i tourism_event --test-tags /tourism_event --stop-after-init --db_host=db --db_user=odoo --db_password=odoo`
-- Next: T3 (resources + allocations + overlap constraint).
+- T3 done (2026-10-27): RED observed (`setUpClass` errored, models missing); GREEN: 12 tests pass (4 event + 8 allocation: kinds, default `reserved`, overlap rejected, back-to-back allowed, other resource allowed, `released` does not block, end after start, moving onto a busy slot rejected). Allocation `status`: `reserved|in_use|released` (T4 drives it). Risk: item 4 (concurrency): the overlap check is a Python `@api.constrains` search, so two concurrent transactions can both pass it and double-book. Not mitigated yet; option: PostgreSQL exclusion constraint (`btree_gist`) as a database-level guard. Decision pending with the user.
+- Next: T4 (transitions drive allocation status).
