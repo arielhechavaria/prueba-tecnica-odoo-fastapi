@@ -6,6 +6,7 @@
     "data": [
         "security/ir.model.access.csv",
         "views/event_views.xml",
+        "views/resource_views.xml",
     ],
     "license": "LGPL-3",
     "application": True,
