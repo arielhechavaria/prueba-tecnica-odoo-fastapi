@@ -12,7 +12,7 @@ Branch: feat/tourism-event-resources | Delivery strategy: ask-on-risk | Test run
 
 ## Tasks
 - [x] T1 (S1) inline — docker compose Odoo 17 + PostgreSQL + FastAPI, healthchecks, `.env.example` — suggested model: sonnet — commit: 1ffa6bd
-- [ ] T2 (S2) inline — Odoo addon `tourism_event`: event model — suggested model: opus — commit: pending
+- [x] T2 (S2) inline — Odoo addon `tourism_event`: event model — suggested model: opus — commit: 0c0d0fc
 - [ ] T3 (S4) inline — resource model + date-range allocations + overlap constraint — suggested model: opus — commit: pending
 - [ ] T4 (S3) inline — state transitions that drive allocation status — suggested model: opus — commit: pending
 - [ ] T5 (S5) inline — FastAPI Odoo client + endpoints — suggested model: sonnet — commit: pending
@@ -24,4 +24,6 @@ Branch: feat/tourism-event-resources | Delivery strategy: ask-on-risk | Test run
 - L2 (2026-10-27, user): chose scenario 2 (resource allocation per phase); authorized `git init` and creating this document.
 - Progress: git repo initialized on branch feat/tourism-event-resources.
 - T1 done (2026-10-27): `docker compose config` OK; `up --build --wait` brought db, odoo, api to healthy; `GET :8001/health` -> `{"status":"ok"}`; Odoo `/web/login` -> 303 (no database yet, expected). Host ports 5432 and 8000 were already taken, so Postgres is not published and the API uses 8001. RED exception: infra task, no runnable test; checked structurally and at runtime. Risk: none.
-- Next: T2 (Odoo addon `tourism_event`); needs the `tourism` database created and the addon installed.
+- T2 done (2026-10-27): created db `tourism` (`-i base`); RED observed (model missing, tests error); GREEN: 4 tests pass via `odoo -d tourism -i tourism_event --test-tags /tourism_event --stop-after-init`. Tightened the required-fields test to `IntegrityError` because `assertRaises(Exception)` passed vacuously in RED. State keys: `antes|durante|despues`. Risk: none.
+- Test runner (Odoo): `docker compose exec -T odoo odoo -d tourism -i tourism_event --test-tags /tourism_event --stop-after-init --db_host=db --db_user=odoo --db_password=odoo`
+- Next: T3 (resources + allocations + overlap constraint).
