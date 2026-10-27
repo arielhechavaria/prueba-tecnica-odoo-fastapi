@@ -1,5 +1,8 @@
+from psycopg2 import IntegrityError
+
 from odoo.exceptions import ValidationError
 from odoo.tests.common import TransactionCase, tagged
+from odoo.tools import mute_logger
 
 
 @tagged("post_install", "-at_install", "tourism_event")
@@ -75,6 +78,31 @@ class TestTourismAllocation(TransactionCase):
             event=self.other_event,
         )
         self.assertTrue(allocation.id)
+
+    def _insert_sql(self, resource, start, end, status="reserved"):
+        self.cr.execute(
+            "INSERT INTO tourism_allocation"
+            " (event_id, resource_id, date_start, date_end, status)"
+            " VALUES (%s, %s, %s, %s, %s)",
+            (self.other_event.id, resource.id, start, end, status),
+        )
+
+    def test_database_rejects_overlap_without_the_python_check(self):
+        self._allocate(self.bus, "2026-11-01 09:00:00", "2026-11-01 18:00:00")
+        with mute_logger("odoo.sql_db"), self.assertRaises(IntegrityError):
+            with self.cr.savepoint():
+                self._insert_sql(
+                    self.bus, "2026-11-01 17:00:00", "2026-11-01 20:00:00"
+                )
+
+    def test_database_allows_back_to_back_and_released_rows(self):
+        self._allocate(self.bus, "2026-11-01 09:00:00", "2026-11-01 18:00:00")
+        with self.cr.savepoint():
+            self._insert_sql(self.bus, "2026-11-01 18:00:00", "2026-11-01 20:00:00")
+        with self.cr.savepoint():
+            self._insert_sql(
+                self.bus, "2026-11-01 10:00:00", "2026-11-01 12:00:00", "released"
+            )
 
     def test_end_must_be_after_start(self):
         with self.assertRaises(ValidationError):

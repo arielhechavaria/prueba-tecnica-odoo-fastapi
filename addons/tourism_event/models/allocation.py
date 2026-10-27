@@ -1,6 +1,8 @@
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
+GUARDED_FIELDS = {"resource_id", "date_start", "date_end", "status"}
+
 
 class TourismAllocation(models.Model):
     _name = "tourism.allocation"
@@ -21,27 +23,65 @@ class TourismAllocation(models.Model):
         required=True,
     )
 
-    @api.constrains("date_start", "date_end")
-    def _check_dates(self):
-        for allocation in self:
-            if allocation.date_end <= allocation.date_start:
-                raise ValidationError("The allocation must end after it starts.")
+    def init(self):
+        # Race-safe backstop: the validation below cannot see concurrent transactions.
+        self.env.cr.execute("CREATE EXTENSION IF NOT EXISTS btree_gist")
+        self.env.cr.execute(
+            """
+            ALTER TABLE tourism_allocation
+                DROP CONSTRAINT IF EXISTS tourism_allocation_no_overlap;
+            ALTER TABLE tourism_allocation
+                ADD CONSTRAINT tourism_allocation_no_overlap
+                EXCLUDE USING gist (
+                    resource_id WITH =,
+                    tsrange(date_start, date_end) WITH &&
+                ) WHERE (status <> 'released');
+            """
+        )
 
-    @api.constrains("resource_id", "date_start", "date_end", "status")
-    def _check_no_overlap(self):
-        for allocation in self.filtered(lambda a: a.status != "released"):
-            clash = self.search(
-                [
-                    ("id", "!=", allocation.id),
-                    ("resource_id", "=", allocation.resource_id.id),
-                    ("status", "!=", "released"),
-                    ("date_start", "<", allocation.date_end),
-                    ("date_end", ">", allocation.date_start),
-                ],
-                limit=1,
+    def _validate_slot(self, resource_id, date_start, date_end, status, ignore=None):
+        """Raise a readable error before the database constraint would fire."""
+        start = fields.Datetime.to_datetime(date_start)
+        end = fields.Datetime.to_datetime(date_end)
+        if end <= start:
+            raise ValidationError("The allocation must end after it starts.")
+        if status == "released":
+            return
+        domain = [
+            ("resource_id", "=", resource_id),
+            ("status", "!=", "released"),
+            ("date_start", "<", end),
+            ("date_end", ">", start),
+        ]
+        if ignore:
+            domain.append(("id", "not in", ignore.ids))
+        clash = self.search(domain, limit=1)
+        if clash:
+            raise ValidationError(
+                f"{clash.resource_id.name} is already allocated "
+                f"to {clash.event_id.name} in that period."
             )
-            if clash:
-                raise ValidationError(
-                    f"{allocation.resource_id.name} is already allocated "
-                    f"to {clash.event_id.name} in that period."
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if {"resource_id", "date_start", "date_end"} <= vals.keys():
+                self._validate_slot(
+                    vals["resource_id"],
+                    vals["date_start"],
+                    vals["date_end"],
+                    vals.get("status", "reserved"),
                 )
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if GUARDED_FIELDS & vals.keys():
+            for allocation in self:
+                self._validate_slot(
+                    vals.get("resource_id", allocation.resource_id.id),
+                    vals.get("date_start", allocation.date_start),
+                    vals.get("date_end", allocation.date_end),
+                    vals.get("status", allocation.status),
+                    ignore=allocation,
+                )
+        return super().write(vals)
