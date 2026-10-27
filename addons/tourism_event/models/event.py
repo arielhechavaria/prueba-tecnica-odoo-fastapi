@@ -16,3 +16,4 @@ class TourismEvent(models.Model):
     location = fields.Char()
     capacity = fields.Integer()
     description = fields.Text()
+    allocation_ids = fields.One2many("tourism.allocation", "event_id")

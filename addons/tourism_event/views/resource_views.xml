@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="tourism_resource_view_tree" model="ir.ui.view">
+        <field name="name">tourism.resource.tree</field>
+        <field name="model">tourism.resource</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="kind"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="tourism_resource_action" model="ir.actions.act_window">
+        <field name="name">Resources</field>
+        <field name="res_model">tourism.resource</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <record id="tourism_allocation_view_tree" model="ir.ui.view">
+        <field name="name">tourism.allocation.tree</field>
+        <field name="model">tourism.allocation</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="event_id"/>
+                <field name="resource_id"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="status"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="tourism_allocation_action" model="ir.actions.act_window">
+        <field name="name">Allocations</field>
+        <field name="res_model">tourism.allocation</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <menuitem id="tourism_resource_menu" name="Resources"
+              parent="tourism_event_menu_root" action="tourism_resource_action"/>
+    <menuitem id="tourism_allocation_menu" name="Allocations"
+              parent="tourism_event_menu_root" action="tourism_allocation_action"/>
+</odoo>

@@ -1,2 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_tourism_event_user,tourism.event user,model_tourism_event,base.group_user,1,1,1,1
+access_tourism_resource_user,tourism.resource user,model_tourism_resource,base.group_user,1,1,1,1
+access_tourism_allocation_user,tourism.allocation user,model_tourism_allocation,base.group_user,1,1,1,1
