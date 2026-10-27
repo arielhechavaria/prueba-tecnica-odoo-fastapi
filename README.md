@@ -29,6 +29,30 @@ docker compose restart odoo
 - API docs: <http://localhost:8001/docs>.
 - Change ports or credentials in `.env`. Stop with `docker compose down` (add `-v` to wipe the data).
 
+### Spanish UI and initial data
+
+The addon ships Spanish translations (`i18n/es.po`) and an initial data file
+(`data/seed_data.xml`, `noupdate="1"`, not demo data). A fresh database gets the data on
+install; to switch an existing one to Spanish:
+
+```bash
+# Load es_ES and refresh the addon translations
+docker compose exec -T odoo odoo -d tourism -u tourism_event --load-language=es_ES \
+  --stop-after-init --db_host=db --db_user=odoo --db_password=odoo
+# Make admin use Spanish (Odoo UI and the messages the API relays from Odoo)
+docker compose exec -T db psql -U odoo -d tourism -c \
+  "update res_partner set lang='es_ES' where id=(select partner_id from res_users where login='admin')"
+docker compose restart odoo
+```
+
+The data holds 3 events (one per state, with their guide, bus and lodging allocations):
+**Senderismo en la Sierra de Gredos** (`antes`, `reserved`), **Escapada cultural a Toledo**
+(`durante`, `in_use`) and **Ruta del vino en la Ribera del Duero** (`despues`, `released`).
+Records are created through the normal model `create`, so `tourism.allocation` validation runs on
+them. State keys (`antes|durante|despues`, `reserved|in_use|released`, `guide|bus|lodging`) stay
+untranslated: they are the API and database contract. `noupdate="1"` means `-u` never overwrites
+edits; to reload it, delete the records or recreate the database.
+
 ## Try it
 
 Resources and allocations are managed in the Odoo UI (**Tourism → Resources / Allocations**);

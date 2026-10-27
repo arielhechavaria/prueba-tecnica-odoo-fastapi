@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Initial data (not demo). Loaded in order: resources, events, allocations;
+         allocations go through tourism.allocation.create, so overlaps are rejected. -->
+
+    <record id="seed_resource_guide_lucia" model="tourism.resource">
+        <field name="name">Lucía Fernández</field>
+        <field name="kind">guide</field>
+    </record>
+
+    <record id="seed_resource_guide_carlos" model="tourism.resource">
+        <field name="name">Carlos Méndez</field>
+        <field name="kind">guide</field>
+    </record>
+
+    <record id="seed_resource_guide_marta" model="tourism.resource">
+        <field name="name">Marta Ruiz</field>
+        <field name="kind">guide</field>
+    </record>
+
+    <record id="seed_resource_bus_mercedes" model="tourism.resource">
+        <field name="name">Autobús 50 plazas (1234-KLM)</field>
+        <field name="kind">bus</field>
+    </record>
+
+    <record id="seed_resource_bus_micro" model="tourism.resource">
+        <field name="name">Microbús 20 plazas (5678-PRT)</field>
+        <field name="kind">bus</field>
+    </record>
+
+    <record id="seed_resource_lodging_alameda" model="tourism.resource">
+        <field name="name">Hotel Alameda Real</field>
+        <field name="kind">lodging</field>
+    </record>
+
+    <record id="seed_resource_lodging_encina" model="tourism.resource">
+        <field name="name">Casa Rural La Encina</field>
+        <field name="kind">lodging</field>
+    </record>
+
+    <record id="seed_resource_lodging_sierra" model="tourism.resource">
+        <field name="name">Albergue Sierra Norte</field>
+        <field name="kind">lodging</field>
+    </record>
+
+    <record id="event_despues" model="tourism.event">
+        <field name="name">Ruta del vino en la Ribera del Duero</field>
+        <field name="start_date">2026-10-09 08:00:00</field>
+        <field name="state">despues</field>
+        <field name="location">Aranda de Duero, Burgos</field>
+        <field name="capacity">40</field>
+        <field name="description">Ruta de bodegas con cata y comida tradicional. Finalizada.</field>
+    </record>
+
+    <record id="event_durante" model="tourism.event">
+        <field name="name">Escapada cultural a Toledo</field>
+        <field name="start_date">2026-10-26 08:00:00</field>
+        <field name="state">durante</field>
+        <field name="location">Toledo</field>
+        <field name="capacity">25</field>
+        <field name="description">Visita guiada por el casco histórico y la catedral. En curso.</field>
+    </record>
+
+    <record id="event_antes" model="tourism.event">
+        <field name="name">Senderismo en la Sierra de Gredos</field>
+        <field name="start_date">2026-11-20 09:00:00</field>
+        <field name="state">antes</field>
+        <field name="location">Candeleda, Ávila</field>
+        <field name="capacity">30</field>
+        <field name="description">Dos jornadas de senderismo por la Garganta de Alardos. Pendiente de celebrar.</field>
+    </record>
+
+    <record id="seed_alloc_despues_guide" model="tourism.allocation">
+        <field name="event_id" ref="event_despues"/>
+        <field name="resource_id" ref="seed_resource_guide_lucia"/>
+        <field name="date_start">2026-10-09 08:00:00</field>
+        <field name="date_end">2026-10-11 20:00:00</field>
+        <field name="status">released</field>
+    </record>
+
+    <record id="seed_alloc_despues_bus" model="tourism.allocation">
+        <field name="event_id" ref="event_despues"/>
+        <field name="resource_id" ref="seed_resource_bus_mercedes"/>
+        <field name="date_start">2026-10-09 08:00:00</field>
+        <field name="date_end">2026-10-11 20:00:00</field>
+        <field name="status">released</field>
+    </record>
+
+    <record id="seed_alloc_despues_lodging" model="tourism.allocation">
+        <field name="event_id" ref="event_despues"/>
+        <field name="resource_id" ref="seed_resource_lodging_alameda"/>
+        <field name="date_start">2026-10-09 08:00:00</field>
+        <field name="date_end">2026-10-11 20:00:00</field>
+        <field name="status">released</field>
+    </record>
+
+    <record id="seed_alloc_durante_guide" model="tourism.allocation">
+        <field name="event_id" ref="event_durante"/>
+        <field name="resource_id" ref="seed_resource_guide_carlos"/>
+        <field name="date_start">2026-10-26 08:00:00</field>
+        <field name="date_end">2026-10-29 20:00:00</field>
+        <field name="status">in_use</field>
+    </record>
+
+    <record id="seed_alloc_durante_bus" model="tourism.allocation">
+        <field name="event_id" ref="event_durante"/>
+        <field name="resource_id" ref="seed_resource_bus_micro"/>
+        <field name="date_start">2026-10-26 08:00:00</field>
+        <field name="date_end">2026-10-29 20:00:00</field>
+        <field name="status">in_use</field>
+    </record>
+
+    <record id="seed_alloc_durante_lodging" model="tourism.allocation">
+        <field name="event_id" ref="event_durante"/>
+        <field name="resource_id" ref="seed_resource_lodging_encina"/>
+        <field name="date_start">2026-10-26 08:00:00</field>
+        <field name="date_end">2026-10-29 20:00:00</field>
+        <field name="status">in_use</field>
+    </record>
+
+    <record id="seed_alloc_antes_guide" model="tourism.allocation">
+        <field name="event_id" ref="event_antes"/>
+        <field name="resource_id" ref="seed_resource_guide_marta"/>
+        <field name="date_start">2026-11-20 09:00:00</field>
+        <field name="date_end">2026-11-22 18:00:00</field>
+        <field name="status">reserved</field>
+    </record>
+
+    <record id="seed_alloc_antes_bus" model="tourism.allocation">
+        <field name="event_id" ref="event_antes"/>
+        <field name="resource_id" ref="seed_resource_bus_mercedes"/>
+        <field name="date_start">2026-11-20 09:00:00</field>
+        <field name="date_end">2026-11-22 18:00:00</field>
+        <field name="status">reserved</field>
+    </record>
+
+    <record id="seed_alloc_antes_lodging" model="tourism.allocation">
+        <field name="event_id" ref="event_antes"/>
+        <field name="resource_id" ref="seed_resource_lodging_sierra"/>
+        <field name="date_start">2026-11-20 09:00:00</field>
+        <field name="date_end">2026-11-22 18:00:00</field>
+        <field name="status">reserved</field>
+    </record>
+
+</odoo>

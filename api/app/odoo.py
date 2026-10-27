@@ -63,14 +63,14 @@ class OdooClient:
         try:
             body = self.http.post(path, json=payload).json()
         except (httpx.HTTPError, ValueError) as exc:
-            raise OdooError("other", f"Odoo unreachable: {exc}") from exc
+            raise OdooError("other", f"Odoo no está disponible: {exc}") from exc
         error = body.get("error")
         if error:
             data = error.get("data", {})
             name = data.get("name", "")
             raise OdooError(
                 "session" if name == SESSION_EXPIRED else ERROR_KINDS.get(name, "other"),
-                data.get("message") or error.get("message", "Odoo error"),
+                data.get("message") or error.get("message", "Error de Odoo"),
             )
         return body.get("result")
 
@@ -80,7 +80,7 @@ class OdooClient:
             {"db": self.db, "login": self.user, "password": self.password},
         )
         if not result.get("uid"):
-            raise OdooError("auth", "Odoo rejected the configured credentials")
+            raise OdooError("auth", "Odoo rechazó las credenciales configuradas")
         self._authenticated = True
 
     def call(self, model: str, method: str, args: list, kwargs: dict):
@@ -107,7 +107,7 @@ class OdooClient:
             {"fields": EVENT_FIELDS},
         )
         if not rows:
-            raise OdooError("not_found", f"Event {event_id} does not exist")
+            raise OdooError("not_found", f"El evento {event_id} no existe")
         return _event(rows[0])
 
     def create_event(self, vals: dict) -> dict:

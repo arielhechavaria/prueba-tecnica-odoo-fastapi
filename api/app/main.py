@@ -113,5 +113,5 @@ def available_resources(
     odoo: OdooClient = Depends(get_odoo),
 ):
     if end <= start:
-        raise HTTPException(422, "'to' must be after 'from'")
+        raise HTTPException(422, "'to' debe ser posterior a 'from'")
     return odoo.available_resources(start, end)

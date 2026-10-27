@@ -91,7 +91,7 @@ def test_overlapping_allocation_is_rejected_by_odoo(world):
     with pytest.raises(OdooError) as exc:
         allocate_bus(other)
     assert exc.value.kind == "validation"
-    assert "already allocated" in exc.value.message
+    assert "ya está asignado" in exc.value.message
 
 
 def test_invalid_transition_is_409_and_keeps_state(world):

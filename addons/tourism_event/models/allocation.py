@@ -1,4 +1,4 @@
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 GUARDED_FIELDS = {"resource_id", "date_start", "date_end", "status"}
@@ -44,7 +44,7 @@ class TourismAllocation(models.Model):
         start = fields.Datetime.to_datetime(date_start)
         end = fields.Datetime.to_datetime(date_end)
         if end <= start:
-            raise ValidationError("The allocation must end after it starts.")
+            raise ValidationError(_("The allocation must end after it starts."))
         if status == "released":
             return
         domain = [
@@ -58,8 +58,11 @@ class TourismAllocation(models.Model):
         clash = self.search(domain, limit=1)
         if clash:
             raise ValidationError(
-                f"{clash.resource_id.name} is already allocated "
-                f"to {clash.event_id.name} in that period."
+                _(
+                    "%(resource)s is already allocated to %(event)s in that period.",
+                    resource=clash.resource_id.name,
+                    event=clash.event_id.name,
+                )
             )
 
     @api.model_create_multi

@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import _, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -24,7 +24,12 @@ class TourismEvent(models.Model):
         for event in self:
             if event.state != source:
                 raise ValidationError(
-                    f"Event '{event.name}' cannot go to '{target}' from '{event.state}'."
+                    _(
+                        "Event '%(name)s' cannot go to '%(target)s' from '%(state)s'.",
+                        name=event.name,
+                        target=target,
+                        state=event.state,
+                    )
                 )
         # Goes through tourism.allocation.write so its slot validation is reused.
         self.allocation_ids.filtered(lambda a: a.status == alloc_from).write(
