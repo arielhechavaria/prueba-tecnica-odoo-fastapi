@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-odoo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-odoo}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-odoo}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  odoo:
+    image: odoo:17
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      HOST: db
+      USER: ${POSTGRES_USER:-odoo}
+      PASSWORD: ${POSTGRES_PASSWORD:-odoo}
+    ports:
+      - "${ODOO_PORT:-8069}:8069"
+    volumes:
+      - odoo-data:/var/lib/odoo
+      - ./addons:/mnt/extra-addons
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:8069/web/login >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 30s
+
+  api:
+    build: ./api
+    depends_on:
+      odoo:
+        condition: service_healthy
+    environment:
+      ODOO_URL: http://odoo:8069
+      ODOO_DB: ${ODOO_DB:-tourism}
+      ODOO_USER: ${ODOO_USER:-admin}
+      ODOO_PASSWORD: ${ODOO_PASSWORD:-admin}
+    ports:
+      - "${API_PORT:-8001}:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db-data:
+  odoo-data:
