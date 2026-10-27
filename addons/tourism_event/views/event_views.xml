@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="tourism_event_view_tree" model="ir.ui.view">
+        <field name="name">tourism.event.tree</field>
+        <field name="model">tourism.event</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="start_date"/>
+                <field name="state"/>
+                <field name="location"/>
+                <field name="capacity"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="tourism_event_view_form" model="ir.ui.view">
+        <field name="name">tourism.event.form</field>
+        <field name="model">tourism.event</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="start_date"/>
+                        <field name="state"/>
+                        <field name="location"/>
+                        <field name="capacity"/>
+                        <field name="description"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="tourism_event_action" model="ir.actions.act_window">
+        <field name="name">Events</field>
+        <field name="res_model">tourism.event</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="tourism_event_menu_root" name="Tourism" sequence="10"/>
+    <menuitem id="tourism_event_menu_events" name="Events"
+              parent="tourism_event_menu_root" action="tourism_event_action"/>
+</odoo>
